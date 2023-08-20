@@ -36,7 +36,7 @@ public class NotNotNot : MonoBehaviour {
    string[] ChangeAnswerQuestions = {
       "What was not\nyour last answer?",
 "If I were to ask what was\nyour last answer, what would\nyou not respond with?",
-"If I were to ask what wasn't your last answer, what would you respond with?",
+"If I were to ask what wasn't\nyour last answer, what\nwould you respond with?",
 "What was the button\nthat you didn't\npress last time?",
 "What wasn't the\nbutton you\npressed last?"
    };
@@ -73,6 +73,7 @@ public class NotNotNot : MonoBehaviour {
          Strike();
          OnNeedyDeactivation();
       }
+      IsAnswerTrue = true;
    }
 
    void NoPress () {
@@ -88,6 +89,7 @@ public class NotNotNot : MonoBehaviour {
          Strike();
          OnNeedyDeactivation();
       }
+      IsAnswerTrue = false;
    }
       /*
        * 
@@ -143,7 +145,6 @@ public class NotNotNot : MonoBehaviour {
    }
 
    protected void OnTimerExpired () { //Shit that happens when a needy turns off due to running out of time.
-
       Strike();
       OnNeedyDeactivation();
    }
@@ -227,14 +228,36 @@ public class NotNotNot : MonoBehaviour {
    }
 
 #pragma warning disable 414
-   private readonly string TwitchHelpMessage = @"Use !{0} to do something.";
+   private readonly string TwitchHelpMessage = @"Use !{0} Yes/No to press that button.";
 #pragma warning restore 414
 
    IEnumerator ProcessTwitchCommand (string Command) {
+      Command = Command.Trim().ToUpper();
       yield return null;
+      if (Command == "YES") {
+         YesButton.OnInteract();
+         yield break;
+      }
+      if (Command == "NO") {
+         NoButton.OnInteract();
+         yield break;
+      }
    }
 
-   IEnumerator TwitchHandleForcedSolve () {
-      yield return null;
+   void TwitchHandleForcedSolve () {
+      StartCoroutine(HandleAutosolve());
    }
+
+   IEnumerator HandleAutosolve () {
+      while (true) {
+         while (!IsNeedyActive) yield return null;
+         if (IsAnswerTrue) {
+            YesButton.OnInteract();
+         }
+         else {
+            NoButton.OnInteract();
+         }
+      }
+   }
+
 }
